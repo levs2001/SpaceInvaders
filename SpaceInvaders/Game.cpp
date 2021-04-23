@@ -1,7 +1,8 @@
 #include "Game.h"
+#include "Drawing.h"
 
 template<typename T>
-static void DeleteFromVector(std::vector<T> vec, T& itemDel) {
+static void DeleteFromVector(std::vector<T>& vec, T& itemDel) {
 
 	auto it = std::find(vec.begin(), vec.end(), itemDel);
 	if (it != vec.end())
@@ -9,44 +10,75 @@ static void DeleteFromVector(std::vector<T> vec, T& itemDel) {
 }
 
 void SpInvaders::Init() {
-
+	size_t lifes = 3;
+	hero = new Hero(lifes, ClassXY(WINDOW_MAX_X/2, WINDOW_MAX_Y - HERO_DEFAULT_SIZE_Y/2), ClassXY(HERO_DEFAULT_SIZE_X, HERO_DEFAULT_SIZE_Y));
+	speed = DEFAULT_ALIEN_SPEED;
+	for (size_t i = 0; i != ROW_COUNT; i++) {
+		Row row((i+1) * ALIEN_DEFAULT_SIZE / 2 + i * ALIEN_DIST_Y, ALIEN_DEFAULT_SIZE, ALIEN_DEFAULT_SIZE);
+		rows.push_back(row);
+	}
+	heroShot = ClassXY();
 }
 
-void SpInvaders::Draw() const {
-	hero->Draw();
-	for (const Row& row : rows)
-		row.Draw();
-
-	DrawPatron(alienPatron);
-	DrawPatron(heroPatron);
-}
 
 void SpInvaders::Update() {
-
+	CheckShooting();
+	MoveObjects();
 }
 
 void SpInvaders::MoveObjects() {
 	for (Row& row : rows) {
-		//Дописать для y и сталкивание в  стену
+		const Alien& firstAlien = speed > 0 ? row.GetAliens().back() : row.GetAliens().front();
+		if (firstAlien.GetCoord().x > WINDOW_MAX_X - firstAlien.GetSize().x + firstAlien.GetSize().x / 2 || firstAlien.GetCoord().x - firstAlien.GetSize().x / 2 < 0) {
+			speed = -speed;
+			DownRows(ALIEN_DEFAULT_SIZE);
+		}
 		row.Move(speed);
+	}
+	
+	if (heroShot.x != OUT && heroShot.y) {
+		heroShot.y -= SHOT_SPEED;
 	}
 }
 
 void SpInvaders::CheckShooting() {
-	if (hero->CheckHit(alienPatron))
-		hero->MinLife();
+	for (const ClassXY& aShot : alienShots)
+		if (hero->CheckHit(aShot))
+			hero->MinLife();
 
 	for (Row& row : rows) {
-		if (heroPatron.y > row.GetYcoord() - row.GetYsize()/2 && heroPatron.y < row.GetYcoord() + row.GetYsize()/2) {
+		if (heroShot.y > row.GetYcoord() - row.GetYsize() / 2 && heroShot.y < row.GetYcoord() + row.GetYsize() / 2) {
 			for (Alien& alien : row.GetAliens())
-				if (alien.CheckHit(heroPatron)) {
+				if (alien.CheckHit(heroShot)) {
 					row.KillAlien(alien);
 				}
 		}
 	}
 }
 
+void SpInvaders::DownRows(int y) {
+	for (Row& row : rows) 
+		row.Move(0, y);
+}
+
+void SpInvaders::HeroShot() {
+	hero->Shot(heroShot);
+}
+
+void SpInvaders::AlienShot() {
+	//Здесь пушим в вектор и делаем шот
+}
+
+Row::Row(int yCentr, size_t ySize, size_t xSize) :yCentr(yCentr), ySize(ySize) {
+	for (size_t i = 0; i < ALIEN_ROW_COUNT; i++) {
+		ClassXY size(xSize, ySize);
+		ClassXY coord((i+1)*size.x + i*ALIEN_DIST_X, yCentr);
+		aliens.push_back(Alien(coord, size));
+	}
+}
+
 void Row::Move(int x, int y) {
+	yCentr += y;
 	for (Alien& alien : aliens)
 		alien.Move(x, y);
 }
@@ -56,28 +88,26 @@ void Row::KillAlien(Alien& alien) {
 	DeleteFromVector(aliens, alien);
 }
 
-void Row::Draw() const {
 
-}
-
-bool Entity::CheckHit(ClassXY patron) const{
-	if (patron.x > coord.x - size.x / 2 && patron.x < coord.x + size.x / 2)
-		if (patron.y > coord.y - size.y / 2 && patron.y < coord.y + size.y / 2)
+bool Entity::CheckHit(ClassXY shot) const {
+	if (shot.x > coord.x - size.x / 2 && shot.x < coord.x + size.x / 2)
+		if (shot.y > coord.y - size.y / 2 && shot.y < coord.y + size.y / 2)
 			return true;
 	return false;
 }
 
-void Alien::Draw() const {
-
+void Entity::Shot(ClassXY& shot) {
+	shot.x = coord.x;
+	shot.y = coord.y;
 }
+//void Alien::Shot(ClassXY& shot) {
+//
+//}
 
 void Alien::Die() {
 
 }
 
-void Hero::Draw() const {
-
-}
 
 void Hero::MinLife() {
 	lifes--;
@@ -85,10 +115,11 @@ void Hero::MinLife() {
 		Die();
 }
 
+//void Hero::Shot(ClassXY& shot) {
+//
+//}
+
 void Hero::Die() {
 
 }
 
-void DrawPatron(ClassXY patron) {
-
-}
