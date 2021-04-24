@@ -3,7 +3,7 @@
 #include "Drawing.h"
 
 #define LINE_WIDTH 7 
-#define LINE_COLOR RGB(255, 100, 200) 
+#define PINK RGB(255, 100, 200) 
 #define PATRON_SIZE 20 
 
 static void DrawSquare(HDC hdc, ClassXY centr, ClassXY size, COLORREF color) {
@@ -18,9 +18,8 @@ static void DrawSquare(HDC hdc, ClassXY centr, ClassXY size, COLORREF color) {
 	DeleteObject(hBrush);
 }
 
-static void DrawLine(HDC hdc, int x1, int y1, int x2, int y2)
-{
-	HPEN hPen = CreatePen(PS_SOLID, LINE_WIDTH, LINE_COLOR); //Создаётся объект
+static void DrawLine(HDC hdc, COLORREF color, int x1, int y1, int x2, int y2) {
+	HPEN hPen = CreatePen(PS_SOLID, LINE_WIDTH, color); //Создаётся объект
 	SelectObject(hdc, hPen); //Объект делается текущим
 
 	MoveToEx(hdc, x1, y1, NULL); //сделать текущими координаты x1, y1
@@ -30,7 +29,7 @@ static void DrawLine(HDC hdc, int x1, int y1, int x2, int y2)
 }
 
 static void DrawPatron(const ClassXY patron, HDC hdc) {
-	DrawLine(hdc, patron.x, patron.y - PATRON_SIZE / 2, patron.x, patron.y + PATRON_SIZE / 2);
+	DrawLine(hdc, PINK, patron.x, patron.y - PATRON_SIZE / 2, patron.x, patron.y + PATRON_SIZE / 2);
 }
 
 void SpInvaders::Draw(HDC hdc) const {

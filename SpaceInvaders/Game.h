@@ -8,6 +8,7 @@
 #define ALIEN_DEFAULT_SIZE 40
 #define ALIEN_DIST_X 50
 #define ALIEN_DIST_Y 100
+#define ALIEN_SHOT_FREQUENCY 10
 #define ROW_COUNT 5
 #define HERO_DEFAULT_SIZE_X 40
 #define HERO_DEFAULT_SIZE_Y 40
@@ -149,8 +150,9 @@ private:
 	Hero* hero;
 	std::vector<Row> rows;
 	int speed;
+	size_t timeToShot;
 	std::vector<ClassXY> alienShots;
 	ClassXY heroShot;
 };
 
-void DrawPatron(ClassXY patron);
+inline bool IsOut(ClassXY point);
