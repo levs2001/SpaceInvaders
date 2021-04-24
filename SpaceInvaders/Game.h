@@ -3,20 +3,23 @@
 #include <Vector>
 #include "Drawing.h"
 #include <Windows.h>
+#include <string>
+
 
 #define ALIEN_ROW_COUNT 11
 #define ALIEN_DEFAULT_SIZE 40
 #define ALIEN_DIST_X 50
 #define ALIEN_DIST_Y 100
-#define ALIEN_SHOT_FREQUENCY 10
+#define ALIEN_SHOT_FREQUENCY 30
 #define ROW_COUNT 5
 #define HERO_DEFAULT_SIZE_X 40
 #define HERO_DEFAULT_SIZE_Y 40
-#define OUT -1
+#define OUT -10
 #define HERO_SPEED 10
-#define DEFAULT_ALIEN_SPEED 3
+#define DEFAULT_ALIEN_SPEED 1
 
-#define SHOT_SPEED 10
+#define HERO_SHOT_SPEED 30
+#define ALIEN_SHOT_SPEED 30
 
 #define ID_TIMER_DRAWING 1
 #define ID_TIMER_UPDATE 2
@@ -79,6 +82,14 @@ public:
 	virtual void Die() override;
 	//virtual void Shot(ClassXY& shot) override;
 	void MinLife();
+	
+	size_t GetLifes() {
+		return lifes;
+	}
+
+	size_t GetPoints() {
+		return points;
+	}
 
 private:
 	size_t lifes;
@@ -103,6 +114,10 @@ public:
 	void Draw(HDC hdc) const;
 	void Move(int x, int y = 0);
 	void KillAlien(Alien& alien);
+
+	friend bool operator== (const Row& r1, const Row& r2) {
+		return (r1.yCentr == r2.yCentr);
+	}
 
 	~Row() {
 		aliens.clear();
@@ -131,11 +146,20 @@ public:
 	void Init();
 	void Update();
 	void Draw(HDC hdc) const;
+	void DrawPointsLifes(HDC hdc);
 	void HeroShot();
 	void AlienShot();
 	void MoveHero(int x) {
 		hero->Move(x);
 	}
+
+	//std::string GetLifesStr() {
+	//	return std::to_string(hero->GetLifes());
+	//}
+
+	//std::string GetPointsStr() {
+	//	std::to_string(hero->GetPoints());
+	//}
 
 	~SpInvaders() {
 		rows.clear();

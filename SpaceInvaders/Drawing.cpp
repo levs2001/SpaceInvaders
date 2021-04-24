@@ -1,4 +1,5 @@
 #include <Windows.h>
+#include <string>
 #include "Game.h"
 #include "Drawing.h"
 
@@ -39,6 +40,14 @@ void SpInvaders::Draw(HDC hdc) const {
 	for (const ClassXY& aShot : alienShots)
 		DrawPatron(aShot, hdc);
 	DrawPatron(heroShot, hdc);
+}
+
+void SpInvaders::DrawPointsLifes(HDC hdc) {
+	SetTextColor(hdc, PINK);
+	std::string points = std::to_string(hero->GetPoints());
+	std::string lifes = std::to_string(hero->GetLifes());
+	std::string allText = "Points: " + points + "    " + "Lifes: " + lifes;
+	TextOut(hdc, 10, 10, allText.c_str(), allText.size());
 }
 
 void Row::Draw(HDC hdc) const {

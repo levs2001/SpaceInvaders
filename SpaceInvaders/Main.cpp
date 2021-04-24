@@ -52,6 +52,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY: {
 		KillTimer(hWnd, ID_TIMER_UPDATE);
 		KillTimer(hWnd, ID_TIMER_DRAWING);
+		delete game;
 		PostQuitMessage(0);
 		break;
 	}
@@ -77,6 +78,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hWnd, &ps);
 		//Rectangle(hdc, 0, 0, WINDOW_MAX_X, WINDOW_MAX_Y);
+		game->DrawPointsLifes(hdc);
 		game->Draw(hdc);
 		EndPaint(hWnd, &ps);
 	}
@@ -87,8 +89,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 int createMyWindow(HINSTANCE hInstance, int nCmdShow) {
 	registerMyClass(hInstance);
 
-	hWnd = CreateWindow(szClassName, "SpaceInvaders", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, SCREEN_WIDTH, SCREEN_HEIGHT, NULL, NULL, hInstance, NULL);
-
+	hWnd = CreateWindow(szClassName, "SpaceInvaders", WS_OVERLAPPEDWINDOW, 100, /*CW_USEDEFAULT*/ 50, SCREEN_WIDTH, SCREEN_HEIGHT, NULL, NULL, hInstance, NULL);
+	COLORREF bkcolor = RGB(0, 0, 0);
+	HBRUSH bkbrush = CreateSolidBrush(bkcolor);
+	SetClassLongPtr(hWnd, GCL_HBRBACKGROUND, (LONG)bkbrush);
 	if (!hWnd) { return 0; }
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
