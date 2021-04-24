@@ -43,7 +43,7 @@ class Entity {
 public:
 	Entity(ClassXY coord, ClassXY size) : coord(coord), size(size){}
 	virtual void Draw(HDC hdc) const = 0;
-	virtual void Die() = 0;
+	virtual bool IsDied() = 0;
 
 	friend bool operator== (const Entity& a1, const Entity& a2) {
 		return (a1.coord == a2.coord);
@@ -79,10 +79,13 @@ public:
 	}
 
 	virtual void Draw(HDC hdc) const override;
-	virtual void Die() override;
-	//virtual void Shot(ClassXY& shot) override;
+	virtual bool IsDied() override;
 	void MinLife();
-	
+	void SetNewHero();
+	void PlusPoints(size_t plPoints) {
+		points += plPoints;
+	}
+
 	size_t GetLifes() {
 		return lifes;
 	}
@@ -102,7 +105,7 @@ public:
 
 	}
 	virtual void Draw(HDC hdc) const override;
-	virtual void Die() override;
+	virtual bool IsDied() override;
 	//virtual void Shot(ClassXY& shot) override;
 
 private:
@@ -141,42 +144,79 @@ private:
 	size_t ySize;
 };
 
+class SpInvaders;
+
+class GameMenu {
+public:
+	void Init(SpInvaders* host);
+	void Draw(HDC hdc);
+	void KeyUp();
+	void KeyDown();
+	void KeyPress(HWND hWnd);
+	void SetActive() {
+		activity = true;
+	}
+	bool IsActive() const {
+		return activity;
+	}
+
+private:
+	size_t buttonsCount;
+	ClassXY size;
+	ClassXY stLocation;
+	size_t activeButton;
+	bool activity;
+	SpInvaders* host;
+};
+
 class SpInvaders {
 public:
 	void Init();
+	void Start();
 	void Update();
 	void Draw(HDC hdc) const;
-	void DrawPointsLifes(HDC hdc);
 	void HeroShot();
 	void AlienShot();
+	void DrawPointsLifes(HDC hdc, ClassXY position) const;
+	void EndGame();
 	void MoveHero(int x) {
 		hero->Move(x);
 	}
-
-	//std::string GetLifesStr() {
-	//	return std::to_string(hero->GetLifes());
-	//}
-
-	//std::string GetPointsStr() {
-	//	std::to_string(hero->GetPoints());
-	//}
-
-	~SpInvaders() {
-		rows.clear();
-		alienShots.clear();
-		delete hero;
+	
+	bool IsLost() const{
+		return gameLost;
 	}
+	
+	void LoseGame() {
+		gameLost = true;
+	}
+	
+	GameMenu& Menu() {
+		return *gameMenu;
+	}
+	
+	~SpInvaders() {
+		ClearAliens();
+		delete hero;
+		delete gameMenu;
+	}
+
+
 private:
 	void CheckShooting();
 	void MoveObjects();
 	void DownRows(int y);
+	void ClearAliens();
 
+	GameMenu* gameMenu;
 	Hero* hero;
 	std::vector<Row> rows;
 	int speed;
 	size_t timeToShot;
 	std::vector<ClassXY> alienShots;
 	ClassXY heroShot;
+	bool gameLost;
 };
 
 inline bool IsOut(ClassXY point);
+inline bool CheckCapture(ClassXY coordCenter);

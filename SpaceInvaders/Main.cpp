@@ -41,7 +41,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_TIMER: {
 		switch (wParam) {
 		case ID_TIMER_UPDATE:
-			game->Update();
+			if (!game->Menu().IsActive())
+				game->Update();
 			break;
 		case ID_TIMER_DRAWING:
 			InvalidateRect(hWnd, NULL, TRUE);
@@ -59,27 +60,44 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_KEYDOWN: {
 		switch (wParam) {
 		case VK_UP:
+			if (game->Menu().IsActive()) {
+				game->Menu().KeyUp();
+				InvalidateRect(hWnd, NULL, TRUE);
+			}
 			break;
 		case VK_DOWN:
+			if (game->Menu().IsActive()) {
+				game->Menu().KeyDown();
+				InvalidateRect(hWnd, NULL, TRUE);
+			}
 			break;
 		case VK_RIGHT:
-			game->MoveHero(HERO_SPEED);
+			if (!game->Menu().IsActive())
+				game->MoveHero(HERO_SPEED);
 			break;
 		case VK_LEFT:
-			game->MoveHero(-HERO_SPEED);
+			if (!game->Menu().IsActive())
+				game->MoveHero(-HERO_SPEED);
 			break;
+		case VK_RETURN:
 		case VK_SPACE:
-			game->HeroShot();
+			if (game->Menu().IsActive())
+				game->Menu().KeyPress(hWnd);
+			else
+				game->HeroShot();
 			break;
 		}
 		break;
 	}
-	case WM_PAINT:	{
+	case WM_PAINT: {
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hWnd, &ps);
-		//Rectangle(hdc, 0, 0, WINDOW_MAX_X, WINDOW_MAX_Y);
-		game->DrawPointsLifes(hdc);
-		game->Draw(hdc);
+		if (game->Menu().IsActive())
+			game->Menu().Draw(hdc);
+		else {
+			game->DrawPointsLifes(hdc, ClassXY(10, 10));
+			game->Draw(hdc);
+		}
 		EndPaint(hWnd, &ps);
 	}
 	}
@@ -89,15 +107,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 int createMyWindow(HINSTANCE hInstance, int nCmdShow) {
 	registerMyClass(hInstance);
 
-	hWnd = CreateWindow(szClassName, "SpaceInvaders", WS_OVERLAPPEDWINDOW, 100, /*CW_USEDEFAULT*/ 50, SCREEN_WIDTH, SCREEN_HEIGHT, NULL, NULL, hInstance, NULL);
+	hWnd = CreateWindow(szClassName, "SpaceInvaders", WS_OVERLAPPEDWINDOW, 100, 30, SCREEN_WIDTH, SCREEN_HEIGHT, NULL, NULL, hInstance, NULL);
 	COLORREF bkcolor = RGB(0, 0, 0);
 	HBRUSH bkbrush = CreateSolidBrush(bkcolor);
 	SetClassLongPtr(hWnd, GCL_HBRBACKGROUND, (LONG)bkbrush);
 	if (!hWnd) { return 0; }
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
-
-
 }
 
 ATOM registerMyClass(HINSTANCE hInstance)

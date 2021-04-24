@@ -12,6 +12,11 @@ static void DeleteFromVector(std::vector<T>& vec, const T& itemDel) {
 void SpInvaders::Init() {
 	size_t lifes = 3;
 	hero = new Hero(lifes, ClassXY(FIELD_MAX_X / 2, FIELD_MAX_Y - HERO_DEFAULT_SIZE_Y / 2), ClassXY(HERO_DEFAULT_SIZE_X, HERO_DEFAULT_SIZE_Y));
+	gameMenu = new GameMenu;
+	gameMenu->Init(this);
+}
+
+void SpInvaders::Start() {
 	speed = DEFAULT_ALIEN_SPEED;
 	for (size_t i = 0; i != ROW_COUNT; i++) {
 		Row row((i + 1) * ALIEN_DEFAULT_SIZE / 2 + i * ALIEN_DIST_Y + FIELD_MIN_Y, ALIEN_DEFAULT_SIZE, ALIEN_DEFAULT_SIZE);
@@ -19,10 +24,47 @@ void SpInvaders::Init() {
 	}
 	heroShot = ClassXY();
 	timeToShot = 0;
+	hero->SetNewHero();
 }
 
+void SpInvaders::ClearAliens() {
+	rows.clear();
+	alienShots.clear();
+}
+
+void GameMenu::Init(SpInvaders* host) {
+	activity = true;
+	size.x = 200;
+	size.y = 100;
+	stLocation.x = FIELD_MAX_X / 2;
+	stLocation.y = FIELD_MAX_Y / 2;
+	buttonsCount = 2;
+	activeButton = 0;
+	this->host = host;
+}
+
+void GameMenu::KeyUp() {
+	if (activeButton > 0)
+		activeButton--;
+}
+
+void GameMenu::KeyDown() {
+	if (activeButton < buttonsCount - 1)
+		activeButton++;
+}
+
+void GameMenu::KeyPress(HWND hWnd) {
+	if (activeButton == 0) {
+		activity = false;
+		host->Start();
+	}
+	else
+		DestroyWindow(hWnd);
+}
 
 void SpInvaders::Update() {
+	if (CheckCapture(rows.back().GetAliens().back().GetCoord()))
+		LoseGame();
 	CheckShooting();
 	MoveObjects();
 
@@ -36,11 +78,21 @@ void SpInvaders::Update() {
 void SpInvaders::MoveObjects() {
 	for (Row& row : rows) {
 		const Alien& firstAlien = speed > 0 ? row.GetAliens().back() : row.GetAliens().front();
-		if (firstAlien.GetCoord().x > FIELD_MAX_X - firstAlien.GetSize().x + firstAlien.GetSize().x / 2 || firstAlien.GetCoord().x - firstAlien.GetSize().x / 2 < FIELD_MIN_X) {
-			speed = -speed;
-			DownRows(ALIEN_DEFAULT_SIZE);
+		if (!IsLost()) {
+			if (firstAlien.GetCoord().x > FIELD_MAX_X - firstAlien.GetSize().x + firstAlien.GetSize().x / 2 || firstAlien.GetCoord().x - firstAlien.GetSize().x / 2 < FIELD_MIN_X) {
+				speed = -speed;
+				DownRows(ALIEN_DEFAULT_SIZE);
+			}
+			row.Move(speed);
 		}
-		row.Move(speed);
+		else if (!IsOut(firstAlien.GetCoord())) {
+			DownRows(ALIEN_DEFAULT_SIZE);
+			break;
+		}
+		else {
+			EndGame();
+			break;
+		}
 	}
 
 	for (ClassXY& aShot : alienShots) {
@@ -55,11 +107,21 @@ void SpInvaders::MoveObjects() {
 	}
 }
 
+void SpInvaders::EndGame() {
+	ClearAliens();
+	gameMenu->SetActive();
+}
+
 void SpInvaders::CheckShooting() {
 	for (const ClassXY& aShot : alienShots)
 		if (hero->CheckHit(aShot)) {
 			hero->MinLife();
 			DeleteFromVector(alienShots, aShot);
+			if (hero->IsDied()) {
+				//ClearAliens();
+				//gameMenu->SetActive();
+				LoseGame();
+			}
 		}
 
 	for (Row& row : rows) {
@@ -67,6 +129,7 @@ void SpInvaders::CheckShooting() {
 			for (Alien& alien : row.GetAliens())
 				if (alien.CheckHit(heroShot)) {
 					row.KillAlien(alien);
+					hero->PlusPoints(10);
 					heroShot = ClassXY(OUT, OUT);
 				}
 
@@ -116,7 +179,6 @@ void Row::Move(int x, int y) {
 }
 
 void Row::KillAlien(Alien& alien) {
-	alien.Die();
 	DeleteFromVector(aliens, alien);
 }
 
@@ -133,22 +195,33 @@ void Entity::Shot(ClassXY& shot) {
 	shot.y = coord.y;
 }
 
-void Alien::Die() {
-
+bool Alien::IsDied() {
+	return true;
 }
 
 void Hero::MinLife() {
 	lifes--;
-	if (lifes == 0)
-		Die();
 }
 
-void Hero::Die() {
+bool Hero::IsDied() {
+	if (lifes == 0)
+		return true;
+	return false;
+}
 
+void Hero::SetNewHero() {
+	lifes = 3;
+	points = 0;
 }
 
 inline bool IsOut(ClassXY point) {
 	if (point.x<FIELD_MIN_X || point.x>FIELD_MAX_X || point.y<FIELD_MIN_Y || point.y>FIELD_MAX_Y)
+		return true;
+	return false;
+}
+
+inline bool CheckCapture(ClassXY coordCenter) {
+	if (coordCenter.y + ALIEN_DEFAULT_SIZE / 2 > FIELD_CAPTURE_Y)
 		return true;
 	return false;
 }
