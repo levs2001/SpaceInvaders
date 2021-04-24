@@ -3,7 +3,7 @@
 #include <random>
 
 template<typename T>
-static void DeleteFromVector(std::vector<T>& vec, T& itemDel) {
+static void DeleteFromVector(std::vector<T>& vec, const T& itemDel) {
 	auto it = std::find(vec.begin(), vec.end(), itemDel);
 	if (it != vec.end())
 		vec.erase(it);
@@ -42,6 +42,11 @@ void SpInvaders::MoveObjects() {
 		row.Move(speed);
 	}
 
+	for (ClassXY& aShot : alienShots) {
+		if (!IsOut(aShot))
+			aShot.y += SHOT_SPEED;
+	}
+
 	if (!IsOut(heroShot)) {
 		heroShot.y -= SHOT_SPEED;
 	}
@@ -49,8 +54,10 @@ void SpInvaders::MoveObjects() {
 
 void SpInvaders::CheckShooting() {
 	for (const ClassXY& aShot : alienShots)
-		if (hero->CheckHit(aShot))
+		if (hero->CheckHit(aShot)) {
 			hero->MinLife();
+			DeleteFromVector(alienShots, aShot);
+		}
 
 	for (Row& row : rows) {
 		if (heroShot.y > row.GetYcoord() - row.GetYsize() / 2 && heroShot.y < row.GetYcoord() + row.GetYsize() / 2) {
