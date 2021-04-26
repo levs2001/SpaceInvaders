@@ -38,9 +38,10 @@ void SpInvaders::Start() {
 		Row row((i + 1) * ALIEN_DEFAULT_SIZE / 2 + i * ALIEN_DIST_Y + FIELD_MIN_Y, ALIEN_DEFAULT_SIZE, ALIEN_DEFAULT_SIZE);
 		activeLevel->rows.push_back(row);
 	}*/
-	heroShot = ClassXY();
+	//heroShot = ClassXY();
 	timeToShot = 0;
 	timeToMove = 0;
+	gameLost = false;
 	hero->SetNewHero();
 }
 
@@ -106,9 +107,11 @@ void SpInvaders::MoveObjects() {
 		else
 			DeleteFromVector(alienShots, aShot);
 	}
-
-	if (!IsOut(heroShot)) {
-		heroShot.y -= HERO_SHOT_SPEED;
+	for (ClassXY& heroShot : heroShots) {
+		if (!IsOut(heroShot)) 
+			heroShot.y -= HERO_SHOT_SPEED;
+		else
+			DeleteFromVector(heroShots, heroShot);
 	}
 }
 
@@ -121,19 +124,20 @@ void SpInvaders::CheckShooting() {
 				LoseGame();
 			}
 		}
+	for (ClassXY& heroShot : heroShots) {
+		for (Row& row : activeLevel->rows) {
+			if (heroShot.y > row.GetYcoord() - row.GetYsize() / 2 && heroShot.y < row.GetYcoord() + row.GetYsize() / 2) {
+				for (Alien& alien : row.GetAliens())
+					if (alien.CheckHit(heroShot)) {
+						row.KillAlien(alien);
+						hero->PlusPoints(10);
+						DeleteFromVector(heroShots, heroShot);
+						break;
+					}
 
-	for (Row& row : activeLevel->rows) {
-		if (heroShot.y > row.GetYcoord() - row.GetYsize() / 2 && heroShot.y < row.GetYcoord() + row.GetYsize() / 2) {
-			for (Alien& alien : row.GetAliens())
-				if (alien.CheckHit(heroShot)) {
-					row.KillAlien(alien);
-					hero->PlusPoints(10);
-					heroShot = ClassXY(OUT, OUT);
-					break;
-				}
-
-			if (row.GetAliens().size() == 0)
-				DeleteFromVector(activeLevel->rows, row);
+				if (row.GetAliens().size() == 0)
+					DeleteFromVector(activeLevel->rows, row);
+			}
 		}
 	}
 }
@@ -144,8 +148,9 @@ void SpInvaders::DownRows(int y) {
 }
 
 void SpInvaders::HeroShot() {
-	if (IsOut(heroShot))
-		hero->Shot(heroShot);
+	ClassXY shot;
+	heroShots.push_back(shot);
+	hero->Shot(heroShots.back());
 }
 
 void SpInvaders::AlienShot() {
@@ -171,7 +176,7 @@ void SpInvaders::PassLevel() {
 	levels.pop_front();
 	activeLevel = &levels.front();
 	alienShots.clear();
-	heroShot = ClassXY();
+	heroShots.clear();
 	hero->PlusLifes(1);
 	lvlNum++;
 }
@@ -183,6 +188,12 @@ void SpInvaders::ClearLevels() {
 
 void SpInvaders::EndGame() {
 	ClearLevels();
+	if (IsLost()) {
+		//Выводим надпись с проигрышем
+	}
+	else {
+		//Выводим надпись с Победой
+	}
 	gameMenu->SetActive();
 }
 

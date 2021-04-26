@@ -238,7 +238,7 @@ private:
 	size_t timeToShot;
 	size_t timeToMove;
 	std::vector<ClassXY> alienShots;
-	ClassXY heroShot;
+	std::vector<ClassXY> heroShots;
 	bool gameLost;
 	size_t lvlNum;
 };

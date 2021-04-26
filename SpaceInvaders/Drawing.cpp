@@ -26,7 +26,7 @@ static void DrawLine(HDC hdc, COLORREF color, int x1, int y1, int x2, int y2, in
 	HPEN hPen = CreatePen(PS_SOLID, width, color);
 	SelectObject(hdc, hPen);
 
-	MoveToEx(hdc, x1, y1, NULL); 
+	MoveToEx(hdc, x1, y1, NULL);
 	LineTo(hdc, x2, y2);
 
 	DeleteObject(hPen);
@@ -43,7 +43,8 @@ void SpInvaders::Draw(HDC hdc) const {
 		row.Draw(hdc);
 	for (const ClassXY& aShot : alienShots)
 		DrawPatron(aShot, hdc);
-	DrawPatron(heroShot, hdc);
+	for (const ClassXY& heroShot : heroShots)
+		DrawPatron(heroShot, hdc);
 	DrawLine(hdc, RED, FIELD_MIN_X, FIELD_CAPTURE_Y, FIELD_MAX_X, FIELD_CAPTURE_Y, CAPRURE_WIDTH);
 }
 
@@ -69,6 +70,15 @@ void Hero::Draw(HDC hdc) const {
 	DrawSquare(hdc, coord, size, RGB(255, 0, 0));
 }
 
+void BigText(HDC hdc, std::string text) {
+	ClassXY size(400, 100);
+	ClassXY position(FIELD_MAX_X / 2, FIELD_MAX_Y / 3);
+
+	DrawSquare(hdc, position, size, PINK);
+	TextOutA(hdc, position.x - size.x / 9, position.y, text.c_str(), text.size());
+}
+
+
 void GameMenu::Draw(HDC hdc) {
 	COLORREF colB0, colB1;
 	colB0 = activeButton == 0 ? PINK : RED;
@@ -80,6 +90,8 @@ void GameMenu::Draw(HDC hdc) {
 	DrawSquare(hdc, secondButCentr, size, colB1);
 	TextOutA(hdc, stLocation.x - size.x / 9, stLocation.y, "START", strlen("START"));
 	TextOutA(hdc, secondButCentr.x - size.x / 12, secondButCentr.y, "END", strlen("END"));
-}
+	if (host->IsLost())
+		BigText(hdc, "You lose!");
 
+}
 

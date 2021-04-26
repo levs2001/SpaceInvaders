@@ -92,7 +92,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_PAINT: {
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hWnd, &ps);
-		if (game->Menu().IsActive())
+		if (game->Menu().IsActive()) 
 			game->Menu().Draw(hdc);
 		else {
 			game->DrawPointsLifes(hdc, ClassXY(10, 10));
