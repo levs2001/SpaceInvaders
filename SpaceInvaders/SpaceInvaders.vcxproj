@@ -142,10 +142,19 @@
     <ClCompile Include="Drawing.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="TextSystem\TextSystem.cpp" />
+    <ClCompile Include="TextSystem\tinyxml\tinystr.cpp" />
+    <ClCompile Include="TextSystem\tinyxml\tinyxml.cpp" />
+    <ClCompile Include="TextSystem\tinyxml\tinyxmlerror.cpp" />
+    <ClCompile Include="TextSystem\tinyxml\tinyxmlparser.cpp" />
+    <ClCompile Include="TextSystem\tinyxml\xmltest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Drawing.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="TextSystem\TextSystem.h" />
+    <ClInclude Include="TextSystem\tinyxml\tinystr.h" />
+    <ClInclude Include="TextSystem\tinyxml\tinyxml.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

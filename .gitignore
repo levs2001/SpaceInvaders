@@ -338,3 +338,16 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/SpaceInvaders/TextSystem/tinyxml/docs
+/SpaceInvaders/TextSystem/tinyxml/changes.txt
+/SpaceInvaders/TextSystem/tinyxml/echo.dsp
+/SpaceInvaders/TextSystem/tinyxml/Makefile
+/SpaceInvaders/TextSystem/tinyxml/readme.txt
+/SpaceInvaders/TextSystem/tinyxml/tinyxml.sln
+/SpaceInvaders/TextSystem/tinyxml/tinyxmlSTL.dsp
+/SpaceInvaders/TextSystem/tinyxml/tinyXmlTest.dsp
+/SpaceInvaders/TextSystem/tinyxml/tinyXmlTestSTL.dsp
+/SpaceInvaders/TextSystem/tinyxml/tinyxml_lib.dsp
+/SpaceInvaders/TextSystem/tinyxml/utf8test.gif
+/SpaceInvaders/TextSystem/tinyxml/utf8test.xml
+/SpaceInvaders/TextSystem/tinyxml/utf8testverify.xml

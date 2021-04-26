@@ -4,19 +4,20 @@
 #include "Drawing.h"
 #include <Windows.h>
 #include <string>
-
+#include <deque>
 
 #define ALIEN_ROW_COUNT 11
 #define ALIEN_DEFAULT_SIZE 40
 #define ALIEN_DIST_X 50
 #define ALIEN_DIST_Y 100
 #define ALIEN_SHOT_FREQUENCY 30
+#define ALIEN_MOVE_FREQUENCY_IF_LOST 1
 #define ROW_COUNT 5
 #define HERO_DEFAULT_SIZE_X 40
 #define HERO_DEFAULT_SIZE_Y 40
 #define OUT -10
-#define HERO_SPEED 10
-#define DEFAULT_ALIEN_SPEED 1
+#define HERO_SPEED 20
+#define DEFAULT_ALIEN_SPEED 10
 
 #define HERO_SHOT_SPEED 30
 #define ALIEN_SHOT_SPEED 30
@@ -26,6 +27,12 @@
 #define PERIOD_TIMER_DRAWING 50
 #define PERIOD_TIMER_UPDATE 50
 
+#define FILE_LEVELS "lvlTest.xml"
+
+struct TimeAliensC {
+	size_t time;
+	size_t aliensC;
+};
 
 class ClassXY {
 public:
@@ -82,8 +89,12 @@ public:
 	virtual bool IsDied() override;
 	void MinLife();
 	void SetNewHero();
-	void PlusPoints(size_t plPoints) {
-		points += plPoints;
+	void PlusPoints(size_t points) {
+		this->points += points;
+	}
+
+	void PlusLifes(size_t lifes) {
+		this->lifes += lifes;
 	}
 
 	size_t GetLifes() {
@@ -106,17 +117,17 @@ public:
 	}
 	virtual void Draw(HDC hdc) const override;
 	virtual bool IsDied() override;
-	//virtual void Shot(ClassXY& shot) override;
 
 private:
 };
 
 class Row {
 public:
-	Row(int yCentr, size_t ySize, size_t xSize);
+	Row(int yCentr, size_t xSize, size_t ySize);
 	void Draw(HDC hdc) const;
 	void Move(int x, int y = 0);
 	void KillAlien(Alien& alien);
+	size_t GetAliensCount() const;
 
 	friend bool operator== (const Row& r1, const Row& r2) {
 		return (r1.yCentr == r2.yCentr);
@@ -169,6 +180,13 @@ private:
 	SpInvaders* host;
 };
 
+struct Level {
+	size_t GetAliensCount() const;
+	std::vector<Row> rows;
+	std::deque<TimeAliensC> timesToMove;
+	std::deque<TimeAliensC> timesToShot;
+};
+
 class SpInvaders {
 public:
 	void Init();
@@ -176,9 +194,9 @@ public:
 	void Update();
 	void Draw(HDC hdc) const;
 	void HeroShot();
-	void AlienShot();
 	void DrawPointsLifes(HDC hdc, ClassXY position) const;
 	void EndGame();
+	void PassLevel();
 	void MoveHero(int x) {
 		hero->Move(x);
 	}
@@ -196,7 +214,7 @@ public:
 	}
 	
 	~SpInvaders() {
-		ClearAliens();
+		ClearLevels();
 		delete hero;
 		delete gameMenu;
 	}
@@ -206,17 +224,21 @@ private:
 	void CheckShooting();
 	void MoveObjects();
 	void DownRows(int y);
-	void ClearAliens();
+	void AlienShot();
+	void ClearLevels();
+	void InitLevels(std::string filename);
+	size_t GetAlienShotFrequency();
+	size_t GetAlienMoveFrequency();
 
 	GameMenu* gameMenu;
 	Hero* hero;
-	std::vector<Row> rows;
+	std::deque<Level> levels;
+	Level* activeLevel;
 	int speed;
 	size_t timeToShot;
+	size_t timeToMove;
 	std::vector<ClassXY> alienShots;
 	ClassXY heroShot;
 	bool gameLost;
+	size_t lvlNum;
 };
-
-inline bool IsOut(ClassXY point);
-inline bool CheckCapture(ClassXY coordCenter);

@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="TinyXml">
+      <UniqueIdentifier>{cc3b9101-1df7-478b-bbdb-c2d78f697233}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -24,6 +27,24 @@
     <ClCompile Include="Drawing.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TextSystem\TextSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TextSystem\tinyxml\tinystr.cpp">
+      <Filter>TinyXml</Filter>
+    </ClCompile>
+    <ClCompile Include="TextSystem\tinyxml\tinyxml.cpp">
+      <Filter>TinyXml</Filter>
+    </ClCompile>
+    <ClCompile Include="TextSystem\tinyxml\tinyxmlerror.cpp">
+      <Filter>TinyXml</Filter>
+    </ClCompile>
+    <ClCompile Include="TextSystem\tinyxml\tinyxmlparser.cpp">
+      <Filter>TinyXml</Filter>
+    </ClCompile>
+    <ClCompile Include="TextSystem\tinyxml\xmltest.cpp">
+      <Filter>TinyXml</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -31,6 +52,15 @@
     </ClInclude>
     <ClInclude Include="Drawing.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TextSystem\TextSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TextSystem\tinyxml\tinystr.h">
+      <Filter>TinyXml</Filter>
+    </ClInclude>
+    <ClInclude Include="TextSystem\tinyxml\tinyxml.h">
+      <Filter>TinyXml</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
