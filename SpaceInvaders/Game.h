@@ -29,10 +29,27 @@
 
 #define FILE_LEVELS "lvlTest.xml"
 
+//class SpInvaders;
+//class GameMenu;
+//class Row;
+//class Entity;
+//class Alien;
+//class Hero;
+//class ClassXY;
+
 struct TimeAliensC {
 	size_t time;
 	size_t aliensC;
 };
+
+
+
+enum class EGameCond {
+	NOT_PLAYED,
+	LOST,
+	WON
+};
+
 
 class ClassXY {
 public:
@@ -48,7 +65,7 @@ public:
 
 class Entity {
 public:
-	Entity(ClassXY coord, ClassXY size) : coord(coord), size(size){}
+	Entity(ClassXY coord, ClassXY size) : coord(coord), size(size) {}
 	virtual void Draw(HDC hdc) const = 0;
 	virtual bool IsDied() = 0;
 
@@ -60,13 +77,13 @@ public:
 		coord.x += x;
 		coord.y += y;
 	}
-	
+
 	void Shot(ClassXY& shot);
-	
-	ClassXY GetCoord() const{
+
+	ClassXY GetCoord() const {
 		return coord;
 	}
-	
+
 	ClassXY GetSize() const {
 		return size;
 	}
@@ -78,11 +95,10 @@ protected:
 	ClassXY size;
 };
 
-
 class Hero : public Entity {
 public:
 	Hero(size_t lifes, ClassXY coord, ClassXY size, size_t points = 0) : Entity(coord, size), lifes(lifes), points(points) {
-		
+
 	}
 
 	virtual void Draw(HDC hdc) const override;
@@ -112,7 +128,7 @@ private:
 
 class Alien : public Entity {
 public:
-	Alien(ClassXY coord, ClassXY size) : Entity(coord, size){
+	Alien(ClassXY coord, ClassXY size) : Entity(coord, size) {
 
 	}
 	virtual void Draw(HDC hdc) const override;
@@ -144,7 +160,7 @@ public:
 	size_t GetYsize() const {
 		return ySize;
 	}
-	
+
 	std::vector<Alien>& GetAliens() {
 		return aliens;
 	}
@@ -155,7 +171,76 @@ private:
 	size_t ySize;
 };
 
-class SpInvaders;
+struct Level {
+	size_t GetAliensCount() const;
+	std::vector<Row> rows;
+	std::deque<TimeAliensC> timesToMove;
+	std::deque<TimeAliensC> timesToShot;
+};
+
+class GameMenu;
+class SpInvaders {
+public:
+	void Init();
+	void Start();
+	void Update();
+	void Draw(HDC hdc) const;
+	void HeroShot();
+	void DrawPointsLifes(HDC hdc, ClassXY position) const;
+
+	void MoveHero(int x) {
+		hero->Move(x);
+	}
+
+	bool IsLost() const {
+		return gameCond == EGameCond::LOST;
+	}
+
+	bool IsWon() const {
+		return gameCond == EGameCond::WON;
+	}
+
+	GameMenu& Menu() {
+		return *gameMenu;
+	}
+
+	~SpInvaders() {
+		ClearLevels();
+		delete hero;
+		delete gameMenu;
+	}
+
+
+private:
+	void CheckShooting();
+	void MoveObjects();
+	void DownRows(int y);
+	void AlienShot();
+	void ClearLevels();
+	void InitLevels(std::string filename);
+	void EndGame();
+	void PassLevel();
+	size_t GetAlienShotFrequency();
+	size_t GetAlienMoveFrequency();
+
+
+	void LoseGame() {
+		gameCond = EGameCond::LOST;
+	}
+
+	GameMenu* gameMenu;
+	Hero* hero;
+	std::deque<Level> levels;
+	Level* activeLevel;
+	int speed;
+	size_t timeToShot;
+	size_t timeToMove;
+	std::vector<ClassXY> alienShots;
+	std::vector<ClassXY> heroShots;
+	EGameCond gameCond;
+	size_t lvlNum;
+};
+
 
 class GameMenu {
 public:
@@ -180,65 +265,3 @@ private:
 	SpInvaders* host;
 };
 
-struct Level {
-	size_t GetAliensCount() const;
-	std::vector<Row> rows;
-	std::deque<TimeAliensC> timesToMove;
-	std::deque<TimeAliensC> timesToShot;
-};
-
-class SpInvaders {
-public:
-	void Init();
-	void Start();
-	void Update();
-	void Draw(HDC hdc) const;
-	void HeroShot();
-	void DrawPointsLifes(HDC hdc, ClassXY position) const;
-	void EndGame();
-	void PassLevel();
-	void MoveHero(int x) {
-		hero->Move(x);
-	}
-	
-	bool IsLost() const{
-		return gameLost;
-	}
-	
-	void LoseGame() {
-		gameLost = true;
-	}
-	
-	GameMenu& Menu() {
-		return *gameMenu;
-	}
-	
-	~SpInvaders() {
-		ClearLevels();
-		delete hero;
-		delete gameMenu;
-	}
-
-
-private:
-	void CheckShooting();
-	void MoveObjects();
-	void DownRows(int y);
-	void AlienShot();
-	void ClearLevels();
-	void InitLevels(std::string filename);
-	size_t GetAlienShotFrequency();
-	size_t GetAlienMoveFrequency();
-
-	GameMenu* gameMenu;
-	Hero* hero;
-	std::deque<Level> levels;
-	Level* activeLevel;
-	int speed;
-	size_t timeToShot;
-	size_t timeToMove;
-	std::vector<ClassXY> alienShots;
-	std::vector<ClassXY> heroShots;
-	bool gameLost;
-	size_t lvlNum;
-};

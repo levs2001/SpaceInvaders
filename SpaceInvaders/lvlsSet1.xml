@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<level>
+	<row aSizeX="50" aSizeY="50" />
+	
+	<timeToMove time = "10" aliensC = "10"/>
+	<timeToMove time = "5" aliensC = "0"/>
+
+	<timeToShot time = "70" aliensC = "10"/>
+	<timeToShot time = "50" aliensC = "0"/>
+</level>
+<level>
+	<row aSizeX="50" aSizeY="50" />
+	<row aSizeX="50" aSizeY="50" />
+
+	<timeToMove time = "10" aliensC = "10"/>
+	<timeToMove time = "5" aliensC = "0"/>
+
+	<timeToShot time = "70" aliensC = "10"/>
+	<timeToShot time = "50" aliensC = "0"/>
+</level>
+<level>
+	<row aSizeX="40" aSizeY="40" />
+	<row aSizeX="40" aSizeY="40" />
+	<row aSizeX="40" aSizeY="40" />
+
+	<timeToMove time = "10" aliensC = "10"/>
+	<timeToMove time = "5" aliensC = "0"/>
+
+	<timeToShot time = "70" aliensC = "10"/>
+	<timeToShot time = "50" aliensC = "0"/>
+</level>

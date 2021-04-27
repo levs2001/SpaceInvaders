@@ -3,38 +3,10 @@
 #include "Game.h"
 #include "Drawing.h"
 
-#define PATRON_WIDTH 7 
-#define CAPRURE_WIDTH 1 
-
-#define PINK RGB(255, 100, 200) 
-#define RED RGB(255, 0, 0)
-#define PATRON_SIZE 20 
-
-static void DrawSquare(HDC hdc, ClassXY centr, ClassXY size, COLORREF color) {
-	int left = centr.x - size.x / 2;
-	int top = centr.y - size.y / 2;
-	int right = centr.x + size.x / 2;
-	int bottom = centr.y + size.y / 2;
-
-	HBRUSH hBrush = CreateSolidBrush(color);
-	SelectObject(hdc, hBrush);
-	Rectangle(hdc, left, top, right, bottom);
-	DeleteObject(hBrush);
-}
-
-static void DrawLine(HDC hdc, COLORREF color, int x1, int y1, int x2, int y2, int width = PATRON_WIDTH) {
-	HPEN hPen = CreatePen(PS_SOLID, width, color);
-	SelectObject(hdc, hPen);
-
-	MoveToEx(hdc, x1, y1, NULL);
-	LineTo(hdc, x2, y2);
-
-	DeleteObject(hPen);
-}
-
-static void DrawPatron(const ClassXY patron, HDC hdc) {
-	DrawLine(hdc, PINK, patron.x, patron.y - PATRON_SIZE / 2, patron.x, patron.y + PATRON_SIZE / 2);
-}
+static void DrawSquare(HDC hdc, ClassXY centr, ClassXY size, COLORREF color);
+static void DrawLine(HDC hdc, COLORREF color, int x1, int y1, int x2, int y2, int width = PATRON_WIDTH);
+static void DrawPatron(const ClassXY patron, HDC hdc);
+static void BigText(HDC hdc, std::string text);
 
 void SpInvaders::Draw(HDC hdc) const {
 	if (!IsLost())
@@ -70,15 +42,6 @@ void Hero::Draw(HDC hdc) const {
 	DrawSquare(hdc, coord, size, RGB(255, 0, 0));
 }
 
-void BigText(HDC hdc, std::string text) {
-	ClassXY size(400, 100);
-	ClassXY position(FIELD_MAX_X / 2, FIELD_MAX_Y / 3);
-
-	DrawSquare(hdc, position, size, PINK);
-	TextOutA(hdc, position.x - size.x / 9, position.y, text.c_str(), text.size());
-}
-
-
 void GameMenu::Draw(HDC hdc) {
 	COLORREF colB0, colB1;
 	colB0 = activeButton == 0 ? PINK : RED;
@@ -90,8 +53,43 @@ void GameMenu::Draw(HDC hdc) {
 	DrawSquare(hdc, secondButCentr, size, colB1);
 	TextOutA(hdc, stLocation.x - size.x / 9, stLocation.y, "START", strlen("START"));
 	TextOutA(hdc, secondButCentr.x - size.x / 12, secondButCentr.y, "END", strlen("END"));
+	
 	if (host->IsLost())
 		BigText(hdc, "You lose!");
-
+	else if (host->IsWon())
+		BigText(hdc, "You won!");
 }
 
+static void DrawSquare(HDC hdc, ClassXY centr, ClassXY size, COLORREF color) {
+	int left = centr.x - size.x / 2;
+	int top = centr.y - size.y / 2;
+	int right = centr.x + size.x / 2;
+	int bottom = centr.y + size.y / 2;
+
+	HBRUSH hBrush = CreateSolidBrush(color);
+	SelectObject(hdc, hBrush);
+	Rectangle(hdc, left, top, right, bottom);
+	DeleteObject(hBrush);
+}
+
+static void DrawLine(HDC hdc, COLORREF color, int x1, int y1, int x2, int y2, int width) {
+	HPEN hPen = CreatePen(PS_SOLID, width, color);
+	SelectObject(hdc, hPen);
+
+	MoveToEx(hdc, x1, y1, NULL);
+	LineTo(hdc, x2, y2);
+
+	DeleteObject(hPen);
+}
+
+static void DrawPatron(const ClassXY patron, HDC hdc) {
+	DrawLine(hdc, PINK, patron.x, patron.y - PATRON_SIZE / 2, patron.x, patron.y + PATRON_SIZE / 2);
+}
+
+static void BigText(HDC hdc, std::string text) {
+	ClassXY size(400, 100);
+	ClassXY position(FIELD_MAX_X / 2, FIELD_MAX_Y / 3);
+
+	DrawSquare(hdc, position, size, PINK);
+	TextOutA(hdc, position.x - size.x / 9, position.y, text.c_str(), text.size());
+}

@@ -4,23 +4,9 @@
 #include "TextSystem/TextSystem.h"
 
 template<typename T>
-static void DeleteFromVector(std::vector<T>& vec, const T& itemDel) {
-	auto it = std::find(vec.begin(), vec.end(), itemDel);
-	if (it != vec.end())
-		vec.erase(it);
-}
-
-static inline bool IsOut(ClassXY point) {
-	if (point.x<FIELD_MIN_X || point.x>FIELD_MAX_X || point.y<FIELD_MIN_Y || point.y>FIELD_MAX_Y)
-		return true;
-	return false;
-}
-
-static inline bool CheckCapture(ClassXY coordCenter) {
-	if (coordCenter.y + ALIEN_DEFAULT_SIZE / 2 > FIELD_CAPTURE_Y)
-		return true;
-	return false;
-}
+static void DeleteFromVector(std::vector<T>& vec, const T& itemDel);
+static inline bool IsOut(ClassXY point);
+static inline bool CheckCapture(ClassXY coordCenter);
 
 void SpInvaders::Init() {
 	size_t lifes = 3;
@@ -28,26 +14,18 @@ void SpInvaders::Init() {
 	hero = new Hero(lifes, ClassXY(FIELD_MAX_X / 2, FIELD_MAX_Y - HERO_DEFAULT_SIZE_Y / 2), ClassXY(HERO_DEFAULT_SIZE_X, HERO_DEFAULT_SIZE_Y));
 	gameMenu = new GameMenu;
 	gameMenu->Init(this);
-	InitLevels(FILE_LEVELS);
 }
 
 void SpInvaders::Start() {
-	//HACK: Start() нужно переделать, теперь ряды находятся в levels и инициализируются в Init
 	speed = DEFAULT_ALIEN_SPEED;
-	/*for (size_t i = 0; i != ROW_COUNT; i++) {
-		Row row((i + 1) * ALIEN_DEFAULT_SIZE / 2 + i * ALIEN_DIST_Y + FIELD_MIN_Y, ALIEN_DEFAULT_SIZE, ALIEN_DEFAULT_SIZE);
-		activeLevel->rows.push_back(row);
-	}*/
-	//heroShot = ClassXY();
 	timeToShot = 0;
 	timeToMove = 0;
-	gameLost = false;
+	gameCond = EGameCond::NOT_PLAYED;
+	InitLevels(FILE_LEVELS);
 	hero->SetNewHero();
 }
 
 void SpInvaders::Update() {
-	if (activeLevel->GetAliensCount() == 0)
-		PassLevel();
 	if (CheckCapture(activeLevel->rows.back().GetAliens().back().GetCoord()))
 		LoseGame();
 	CheckShooting();
@@ -60,6 +38,8 @@ void SpInvaders::Update() {
 		AlienShot();
 		timeToShot = 0;
 	}
+	if (activeLevel->GetAliensCount() == 0)
+		PassLevel();
 }
 
 size_t SpInvaders::GetAlienShotFrequency() {
@@ -173,12 +153,18 @@ void SpInvaders::InitLevels(std::string filename) {
 }
 
 void SpInvaders::PassLevel() {
-	levels.pop_front();
-	activeLevel = &levels.front();
 	alienShots.clear();
 	heroShots.clear();
-	hero->PlusLifes(1);
-	lvlNum++;
+	levels.pop_front();
+	if (levels.size()!=0) {
+		activeLevel = &levels.front();
+		lvlNum++;
+		hero->PlusLifes(1);
+	}
+	else {
+		gameCond = EGameCond::WON;
+		EndGame();
+	}
 }
 
 void SpInvaders::ClearLevels() {
@@ -188,12 +174,6 @@ void SpInvaders::ClearLevels() {
 
 void SpInvaders::EndGame() {
 	ClearLevels();
-	if (IsLost()) {
-		//Выводим надпись с проигрышем
-	}
-	else {
-		//Выводим надпись с Победой
-	}
 	gameMenu->SetActive();
 }
 
@@ -287,4 +267,23 @@ bool Hero::IsDied() {
 void Hero::SetNewHero() {
 	lifes = 3;
 	points = 0;
+}
+
+template<typename T>
+static void DeleteFromVector(std::vector<T>& vec, const T& itemDel) {
+	auto it = std::find(vec.begin(), vec.end(), itemDel);
+	if (it != vec.end())
+		vec.erase(it);
+}
+
+static inline bool IsOut(ClassXY point) {
+	if (point.x<FIELD_MIN_X || point.x>FIELD_MAX_X || point.y<FIELD_MIN_Y || point.y>FIELD_MAX_Y)
+		return true;
+	return false;
+}
+
+static inline bool CheckCapture(ClassXY coordCenter) {
+	if (coordCenter.y + ALIEN_DEFAULT_SIZE / 2 > FIELD_CAPTURE_Y)
+		return true;
+	return false;
 }
