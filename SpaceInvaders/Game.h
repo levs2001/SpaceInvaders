@@ -29,27 +29,18 @@
 
 #define FILE_LEVELS "lvlTest.xml"
 
-//class SpInvaders;
-//class GameMenu;
-//class Row;
-//class Entity;
-//class Alien;
-//class Hero;
-//class ClassXY;
+class Hero;
+class Alien;
+class Entity;
+class GameMenu;
+class Row;
 
 struct TimeAliensC {
 	size_t time;
 	size_t aliensC;
 };
 
-
-
-enum class EGameCond {
-	NOT_PLAYED,
-	LOST,
-	WON
-};
-
+enum class EGameCond;
 
 class ClassXY {
 public:
@@ -63,6 +54,95 @@ public:
 	}
 };
 
+struct Level {
+	size_t GetAliensCount() const;
+	std::vector<Row> rows;
+	std::deque<TimeAliensC> timesToMove;
+	std::deque<TimeAliensC> timesToShot;
+};
+
+class SpInvaders {
+public:
+	void Init();
+	void Start();
+	void Update();
+	void Draw(HDC hdc) const;
+	void HeroShot();
+	void DrawPointsLifes(HDC hdc, ClassXY position) const;
+	void MoveHero(int x);
+	bool IsLost() const;
+	bool IsWon() const;
+
+	GameMenu& Menu() {
+		return *gameMenu;
+	}
+
+	~SpInvaders() {
+		ClearLevels();
+		delete hero;
+		delete gameMenu;
+	}
+
+private:
+	void CheckShooting();
+	void MoveObjects();
+	void DownRows(int y);
+	void AlienShot();
+	void ClearLevels();
+	void InitLevels(std::string filename);
+	void EndGame();
+	void PassLevel();
+	void LoseGame();
+	size_t GetAlienShotFrequency();
+	size_t GetAlienMoveFrequency();
+	
+	GameMenu* gameMenu;
+	Hero* hero;
+	std::deque<Level> levels;
+	Level* activeLevel;
+	int speed;
+	size_t timeToShot;
+	size_t timeToMove;
+	std::vector<ClassXY> alienShots;
+	std::vector<ClassXY> heroShots;
+	EGameCond gameCond;
+	size_t lvlNum;
+};
+
+class Row {
+public:
+	Row(int yCentr, size_t xSize, size_t ySize);
+	void Draw(HDC hdc) const;
+	void Move(int x, int y = 0);
+	void KillAlien(Alien& alien);
+	size_t GetAliensCount() const;
+
+	friend bool operator== (const Row& r1, const Row& r2) {
+		return (r1.yCentr == r2.yCentr);
+	}
+
+	~Row() {
+		aliens.clear();
+	}
+
+	int GetYcoord() const {
+		return yCentr;
+	}
+
+	size_t GetYsize() const {
+		return ySize;
+	}
+
+	std::vector<Alien>& GetAliens() {
+		return aliens;
+	}
+
+private:
+	std::vector<Alien> aliens;
+	int yCentr;
+	size_t ySize;
+};
+
 class Entity {
 public:
 	Entity(ClassXY coord, ClassXY size) : coord(coord), size(size) {}
@@ -73,10 +153,7 @@ public:
 		return (a1.coord == a2.coord);
 	}
 
-	void Move(int x, int y = 0) {
-		coord.x += x;
-		coord.y += y;
-	}
+	void Move(int x, int y = 0);
 
 	void Shot(ClassXY& shot);
 
@@ -137,111 +214,6 @@ public:
 private:
 };
 
-class Row {
-public:
-	Row(int yCentr, size_t xSize, size_t ySize);
-	void Draw(HDC hdc) const;
-	void Move(int x, int y = 0);
-	void KillAlien(Alien& alien);
-	size_t GetAliensCount() const;
-
-	friend bool operator== (const Row& r1, const Row& r2) {
-		return (r1.yCentr == r2.yCentr);
-	}
-
-	~Row() {
-		aliens.clear();
-	}
-
-	int GetYcoord() const {
-		return yCentr;
-	}
-
-	size_t GetYsize() const {
-		return ySize;
-	}
-
-	std::vector<Alien>& GetAliens() {
-		return aliens;
-	}
-
-private:
-	std::vector<Alien> aliens;
-	int yCentr;
-	size_t ySize;
-};
-
-struct Level {
-	size_t GetAliensCount() const;
-	std::vector<Row> rows;
-	std::deque<TimeAliensC> timesToMove;
-	std::deque<TimeAliensC> timesToShot;
-};
-
-class GameMenu;
-class SpInvaders {
-public:
-	void Init();
-	void Start();
-	void Update();
-	void Draw(HDC hdc) const;
-	void HeroShot();
-	void DrawPointsLifes(HDC hdc, ClassXY position) const;
-
-	void MoveHero(int x) {
-		hero->Move(x);
-	}
-
-	bool IsLost() const {
-		return gameCond == EGameCond::LOST;
-	}
-
-	bool IsWon() const {
-		return gameCond == EGameCond::WON;
-	}
-
-	GameMenu& Menu() {
-		return *gameMenu;
-	}
-
-	~SpInvaders() {
-		ClearLevels();
-		delete hero;
-		delete gameMenu;
-	}
-
-
-private:
-	void CheckShooting();
-	void MoveObjects();
-	void DownRows(int y);
-	void AlienShot();
-	void ClearLevels();
-	void InitLevels(std::string filename);
-	void EndGame();
-	void PassLevel();
-	size_t GetAlienShotFrequency();
-	size_t GetAlienMoveFrequency();
-
-
-	void LoseGame() {
-		gameCond = EGameCond::LOST;
-	}
-
-	GameMenu* gameMenu;
-	Hero* hero;
-	std::deque<Level> levels;
-	Level* activeLevel;
-	int speed;
-	size_t timeToShot;
-	size_t timeToMove;
-	std::vector<ClassXY> alienShots;
-	std::vector<ClassXY> heroShots;
-	EGameCond gameCond;
-	size_t lvlNum;
-};
-
-
 class GameMenu {
 public:
 	void Init(SpInvaders* host);
@@ -265,3 +237,8 @@ private:
 	SpInvaders* host;
 };
 
+enum class EGameCond {
+	NOT_PLAYED,
+	LOST,
+	WON
+};

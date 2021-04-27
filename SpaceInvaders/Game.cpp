@@ -26,10 +26,9 @@ void SpInvaders::Start() {
 }
 
 void SpInvaders::Update() {
-	if (CheckCapture(activeLevel->rows.back().GetAliens().back().GetCoord()))
-		LoseGame();
 	CheckShooting();
-
+	if (activeLevel->GetAliensCount() == 0)
+		PassLevel();
 	timeToMove++;
 	MoveObjects();
 
@@ -38,8 +37,8 @@ void SpInvaders::Update() {
 		AlienShot();
 		timeToShot = 0;
 	}
-	if (activeLevel->GetAliensCount() == 0)
-		PassLevel();
+	if (CheckCapture(activeLevel->rows.back().GetAliens().back().GetCoord()))
+		LoseGame();
 }
 
 size_t SpInvaders::GetAlienShotFrequency() {
@@ -51,7 +50,7 @@ size_t SpInvaders::GetAlienShotFrequency() {
 size_t SpInvaders::GetAlienMoveFrequency() {
 	if (!IsLost()) {
 		if (activeLevel->GetAliensCount() < activeLevel->timesToMove.front().aliensC)
-			activeLevel->timesToMove.pop_front();
+ 	 	 	activeLevel->timesToMove.pop_front();
 		return activeLevel->timesToMove.front().time;
 	}
 	else
@@ -59,7 +58,7 @@ size_t SpInvaders::GetAlienMoveFrequency() {
 }
 
 void SpInvaders::MoveObjects() {
-	if (timeToMove> GetAlienMoveFrequency()) {
+	if (timeToMove > GetAlienMoveFrequency()) {
 		for (Row& row : activeLevel->rows) {
 			const Alien& firstAlien = speed > 0 ? row.GetAliens().back() : row.GetAliens().front();
 			if (!IsLost()) {
@@ -88,7 +87,7 @@ void SpInvaders::MoveObjects() {
 			DeleteFromVector(alienShots, aShot);
 	}
 	for (ClassXY& heroShot : heroShots) {
-		if (!IsOut(heroShot)) 
+		if (!IsOut(heroShot))
 			heroShot.y -= HERO_SHOT_SPEED;
 		else
 			DeleteFromVector(heroShots, heroShot);
@@ -134,8 +133,8 @@ void SpInvaders::HeroShot() {
 }
 
 void SpInvaders::AlienShot() {
-	std::random_device rd;  
-	std::mt19937 gen(rd()); 
+	std::random_device rd;
+	std::mt19937 gen(rd());
 
 	std::uniform_int_distribution<> randRow(0, activeLevel->rows.size() - 1);
 	size_t rowN = randRow(gen);
@@ -156,7 +155,7 @@ void SpInvaders::PassLevel() {
 	alienShots.clear();
 	heroShots.clear();
 	levels.pop_front();
-	if (levels.size()!=0) {
+	if (levels.size() != 0) {
 		activeLevel = &levels.front();
 		lvlNum++;
 		hero->PlusLifes(1);
@@ -165,6 +164,21 @@ void SpInvaders::PassLevel() {
 		gameCond = EGameCond::WON;
 		EndGame();
 	}
+}
+
+void SpInvaders::LoseGame() {
+	gameCond = EGameCond::LOST;
+}
+void SpInvaders::MoveHero(int x) {
+	hero->Move(x);
+}
+
+bool SpInvaders::IsLost() const {
+	return gameCond == EGameCond::LOST;
+}
+
+bool SpInvaders::IsWon() const {
+	return gameCond == EGameCond::WON;
 }
 
 void SpInvaders::ClearLevels() {
@@ -230,7 +244,7 @@ size_t Row::GetAliensCount() const {
 	return aliens.size();
 }
 
-size_t Level::GetAliensCount() const{
+size_t Level::GetAliensCount() const {
 	size_t aCount = 0;
 	for (const Row& row : rows) {
 		aCount += row.GetAliensCount();
@@ -248,6 +262,11 @@ bool Entity::CheckHit(ClassXY shot) const {
 void Entity::Shot(ClassXY& shot) {
 	shot.x = coord.x;
 	shot.y = coord.y;
+}
+
+void Entity::Move(int x, int y) {
+	coord.x += x;
+	coord.y += y;
 }
 
 bool Alien::IsDied() {
