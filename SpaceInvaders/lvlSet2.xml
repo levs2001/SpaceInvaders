@@ -3,8 +3,7 @@
 	<row aSizeX="50" aSizeY="50" />
 	<row aSizeX="50" aSizeY="50" />
 
-	<timeToMove time = "10" aliensC = "17"/>
-	<timeToMove time = "5" aliensC = "10"/>
+	<timeToMove time = "10" aliensC = "10"/>
 	<timeToMove time = "5" aliensC = "0"/>
 
 	<timeToShot time = "70" aliensC = "10"/>
@@ -33,22 +32,10 @@
 	<timeToMove time = "10" aliensC = "35"/>
 	<timeToMove time = "7" aliensC = "15"/>
 	<timeToMove time = "5" aliensC = "5"/>
-	<timeToMove time = "1" aliensC = "0"/>
+	<timeToMove time = "2" aliensC = "0"/>
 
 	<timeToShot time = "50" aliensC = "40"/>
 	<timeToShot time = "30" aliensC = "10"/>
 	<timeToShot time = "10" aliensC = "5"/>
 	<timeToShot time = "2" aliensC = "0"/>
-</level>
-<level>
-	<row aSizeX="30" aSizeY="30" />
-	<row aSizeX="40" aSizeY="40" />
-
-	<timeToMove time = "5" aliensC = "20"/>
-	<timeToMove time = "1" aliensC = "0"/>
-
-	<timeToShot time = "10" aliensC = "20"/>
-	<timeToShot time = "5" aliensC = "15"/>
-	<timeToShot time = "2" aliensC = "10"/>
-	<timeToShot time = "1" aliensC = "0"/>
 </level>

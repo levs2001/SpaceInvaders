@@ -33,12 +33,14 @@ void SpInvaders::Update() {
 	MoveObjects();
 
 	timeToShot++;
-	if (!IsLost() && timeToShot > GetAlienShotFrequency()) {
-		AlienShot();
-		timeToShot = 0;
+	if (!IsLost() && !IsWon()) {
+		if (timeToShot > GetAlienShotFrequency()) {
+			AlienShot();
+			timeToShot = 0;
+		}
+		if (CheckCapture(activeLevel->rows.back().GetAliens().back().GetCoord()))
+			LoseGame();
 	}
-	if (CheckCapture(activeLevel->rows.back().GetAliens().back().GetCoord()))
-		LoseGame();
 }
 
 size_t SpInvaders::GetAlienShotFrequency() {
@@ -58,13 +60,13 @@ size_t SpInvaders::GetAlienMoveFrequency() {
 }
 
 void SpInvaders::MoveObjects() {
-	if (timeToMove > GetAlienMoveFrequency()) {
+	if (!IsWon() && timeToMove > GetAlienMoveFrequency()) {
 		for (Row& row : activeLevel->rows) {
 			const Alien& firstAlien = speed > 0 ? row.GetAliens().back() : row.GetAliens().front();
 			if (!IsLost()) {
-				if (firstAlien.GetCoord().x > FIELD_MAX_X - firstAlien.GetSize().x + firstAlien.GetSize().x / 2 || firstAlien.GetCoord().x - firstAlien.GetSize().x / 2 < FIELD_MIN_X) {
-					speed = -speed;
-					DownRows(ALIEN_DEFAULT_SIZE);
+				if (speed>0 && firstAlien.GetCoord().x > FIELD_MAX_X - firstAlien.GetSize().x + firstAlien.GetSize().x / 2 || speed<0 && firstAlien.GetCoord().x - firstAlien.GetSize().x / 2 < FIELD_MIN_X) {
+					speed = -speed; 
+  					DownRows(ALIEN_DEFAULT_SIZE);
 				}
 				row.Move(speed);
 			}
