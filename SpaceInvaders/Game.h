@@ -115,8 +115,9 @@ public:
 	void Draw(HDC hdc) const;
 	void Move(int x, int y = 0);
 	void KillAlien(Alien& alien);
+	bool CheckHit(ClassXY heroShot);
 	size_t GetAliensCount() const;
-
+	
 	friend bool operator== (const Row& r1, const Row& r2) {
 		return (r1.yCentr == r2.yCentr);
 	}
@@ -125,13 +126,13 @@ public:
 		aliens.clear();
 	}
 
-	int GetYcoord() const {
+	/*int GetYcoord() const {
 		return yCentr;
-	}
+	}*/
 
-	size_t GetYsize() const {
-		return ySize;
-	}
+	//size_t GetYsize() const {
+	//	return ySize;
+	//}
 
 	std::vector<Alien>& GetAliens() {
 		return aliens;

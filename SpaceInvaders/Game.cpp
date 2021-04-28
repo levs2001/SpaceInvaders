@@ -52,7 +52,7 @@ size_t SpInvaders::GetAlienShotFrequency() {
 size_t SpInvaders::GetAlienMoveFrequency() {
 	if (!IsLost()) {
 		if (activeLevel->GetAliensCount() < activeLevel->timesToMove.front().aliensC)
- 	 	 	activeLevel->timesToMove.pop_front();
+			activeLevel->timesToMove.pop_front();
 		return activeLevel->timesToMove.front().time;
 	}
 	else
@@ -64,9 +64,9 @@ void SpInvaders::MoveObjects() {
 		for (Row& row : activeLevel->rows) {
 			const Alien& firstAlien = speed > 0 ? row.GetAliens().back() : row.GetAliens().front();
 			if (!IsLost()) {
-				if (speed>0 && firstAlien.GetCoord().x > FIELD_MAX_X - firstAlien.GetSize().x + firstAlien.GetSize().x / 2 || speed<0 && firstAlien.GetCoord().x - firstAlien.GetSize().x / 2 < FIELD_MIN_X) {
-					speed = -speed; 
-  					DownRows(ALIEN_DEFAULT_SIZE);
+				if (speed > 0 && firstAlien.GetCoord().x > FIELD_MAX_X - firstAlien.GetSize().x + firstAlien.GetSize().x / 2 || speed < 0 && firstAlien.GetCoord().x - firstAlien.GetSize().x / 2 < FIELD_MIN_X) {
+					speed = -speed;
+					DownRows(ALIEN_DEFAULT_SIZE);
 				}
 				row.Move(speed);
 			}
@@ -107,14 +107,9 @@ void SpInvaders::CheckShooting() {
 		}
 	for (ClassXY& heroShot : heroShots) {
 		for (Row& row : activeLevel->rows) {
-			if (heroShot.y > row.GetYcoord() - row.GetYsize() / 2 && heroShot.y < row.GetYcoord() + row.GetYsize() / 2) {
-				for (Alien& alien : row.GetAliens())
-					if (alien.CheckHit(heroShot)) {
-						row.KillAlien(alien);
-						hero->PlusPoints(10);
-						DeleteFromVector(heroShots, heroShot);
-						break;
-					}
+			if (row.CheckHit(heroShot)) {
+				hero->PlusPoints(10);
+				DeleteFromVector(heroShots, heroShot);
 
 				if (row.GetAliens().size() == 0)
 					DeleteFromVector(activeLevel->rows, row);
@@ -191,6 +186,17 @@ void SpInvaders::ClearLevels() {
 void SpInvaders::EndGame() {
 	ClearLevels();
 	gameMenu->SetActive();
+}
+
+bool Row::CheckHit(ClassXY heroShot) {
+	if (heroShot.y > yCentr - ySize / 2 && heroShot.y < yCentr + ySize / 2) {
+		for (Alien& alien : aliens)
+			if (alien.CheckHit(heroShot)) {
+				KillAlien(alien);
+				return true;
+			}
+	}
+	return false;
 }
 
 void GameMenu::Init(SpInvaders* host) {
